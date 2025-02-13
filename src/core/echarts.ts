@@ -137,10 +137,10 @@ declare let global: any;
 
 type ModelFinder = modelUtil.ModelFinder;
 
-export const version = '5.4.3';
+export const version = '5.6.0';
 
 export const dependencies = {
-    zrender: '5.4.4'
+    zrender: '5.6.1'
 };
 
 const TEST_FRAME_REMAIN_TIME = 1;
@@ -425,6 +425,21 @@ class ECharts extends Eventful<ECEventDefinition> {
                 defaultUseDirtyRect = retrieve2(root.__ECHARTS__DEFAULT__USE_DIRTY_RECT__, defaultUseDirtyRect);
             }
 
+        }
+
+        if (opts.ssr) {
+            zrender.registerSSRDataGetter(el => {
+                const ecData = getECData(el);
+                const dataIndex = ecData.dataIndex;
+                if (dataIndex == null) {
+                    return;
+                }
+                const hashMap = createHashMap();
+                hashMap.set('series_index', ecData.seriesIndex);
+                hashMap.set('data_index', dataIndex);
+                ecData.ssrType && hashMap.set('ssr_type', ecData.ssrType);
+                return hashMap;
+            });
         }
 
         const zr = this._zr = zrender.init(dom, {
